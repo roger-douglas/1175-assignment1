@@ -1,4 +1,5 @@
 ﻿using static System.Console;
+using static Rogerio.Assignment1.CharLoader;
 using System;
 
 namespace Rogerio.Assignment1.src.core
@@ -9,7 +10,7 @@ namespace Rogerio.Assignment1.src.core
 
         public CharPrinterApp()
         {
-            // Helper class used to map each character
+            Title = "Draw my input";
             charLoader = new CharLoader();
         }
 
@@ -22,16 +23,26 @@ namespace Rogerio.Assignment1.src.core
             try
             {
                 CharMap[] charsMap = charLoader.LoadChars(input);
+                CharMap[] charMapBlock;
+                int sourceIndex = 0;
+                int sourceSize = charsMap.Length;
 
-                WriteExcitingSentences();
-                Write("\n\n");
-                for (int i = 0; i < 7; i++)
+                WriteLine();
+                for (int j = 0; j < MAX_CHARS_PER_LINE; j++)
                 {
-                    WriteFirstInitial(charsMap, i);
-                    WriteNextInitials(charsMap, i);
-                }
-                Write("\n\n");
+                    charMapBlock = SetupBlockChar(ref sourceSize, ref sourceIndex, charsMap);
 
+                    for (int i = 0; i < 7; i++)
+                        WriteLines(charMapBlock, i);
+
+                    if (sourceSize < 0)
+                        break;
+                    else
+                        sourceIndex += MAX_CHARS_PER_LINE;
+
+                    WriteLine();
+                }
+                WriteLine();
             }
             catch (Exception e)
             {
@@ -42,65 +53,58 @@ namespace Rogerio.Assignment1.src.core
             ReadKey();
         }
 
+        private CharMap[] SetupBlockChar(ref int sourceSize, ref int sourceIndex, CharMap[] charsMap)
+        {
+            int destinationSize = sourceSize < MAX_CHARS_PER_LINE ? sourceSize : MAX_CHARS_PER_LINE;
+            CharMap[] charMapBlock = new CharMap[destinationSize];
+            Array.Copy(charsMap, sourceIndex, charMapBlock, 0, destinationSize);
+            sourceSize -= MAX_CHARS_PER_LINE;
+
+            return charMapBlock;
+        }
+
         /// <summary>
         /// Execute the input from the console
         /// </summary>
         public void ReadFromConsole()
         {
-            Clear();
-            WriteLine("Do you want to try? (Y)es");
-            string answer = ReadLine().Trim().ToUpper();
-
-            if (answer.Equals("Y"))
+            string input;
+            do
             {
-                WriteLine(String.Format("Enter your initials ({0} chars maximum):", CharLoader.MAX_CHARS));
-                answer = ReadLine().Trim();
-                RunApp(answer);
+                Clear();
+                WriteLine(String.Format("Enter your text ({0} chars maximum):", CharLoader.MAX_CHARS));
+                input = ReadLine().Trim();
+                RunApp(input);
+
+                Clear();
+                WriteLine("(E)xit");
+                input = ReadLine().Trim();
+
+                if (input.ToUpper().Equals("E"))
+                    break;
             }
+            while (true);
         }
 
         /// <summary>
-        /// Requirement #1 - Write two sentences using escape for double quotations
-        /// </summary>
-        private void WriteExcitingSentences()
-        {
-            WriteLine(String.Empty);
-            WriteLine("I am exciting about coding while snow outside.");
-            WriteLine("I am a Java Developer, but I still enjoy learning new things because \"Practice Makes Perfect\".");
-        }
-
-        /// <summary>
-        /// Requirement #3 - Write only the first initia using Write method
+        /// It writes all the lines
         /// </summary>
         /// <param name="charsMap">Array of drawn chars</param>
         /// <param name="line">Line position</param>
-        private void WriteFirstInitial(CharMap[] charsMap, int line)
-        {
-            if (charsMap.Length == 1)
-                Write(String.Format("{0}\n", charsMap[0].Map[line]));
-            else
-                Write(String.Format("{0}\t", charsMap[0].Map[line]));
-        }
-
-        /// <summary>
-        /// Requirement #3 - It ignores the first initial and print the subsequent initials if exist
-        /// </summary>
-        /// <param name="charsMap">Array of drawn chars</param>
-        /// <param name="line">Line position</param>
-        private void WriteNextInitials(CharMap[] charsMap, int line)
+        private void WriteLines(CharMap[] charsMap, int line)
         {
             if (charsMap.Length > 1)
             {
                 string buffer = String.Empty;
-                string[] charMap = new string[charsMap.Length - 1];
+                string[] charMap = new string[charsMap.Length];
 
-                for (int i = 1; i < charsMap.Length; i++)
+                for (int i = 0; i < charsMap.Length; i++)
                 {
-                    buffer += "{" + (i - 1) + "}\t";
-                    charMap[i - 1] = charsMap[i].Map[line];
+                    buffer += "{" + i + "}   ";
+                    charMap[i] = charsMap[i].Map[line];
                 }
 
-                WriteLine(String.Format(buffer.Substring(0, buffer.Length - 1), charMap));
+                WriteLine(String.Format(buffer.Substring(0, buffer.Length - 3), charMap));
             }
         }
     }

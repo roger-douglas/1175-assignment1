@@ -5,7 +5,8 @@ namespace Rogerio.Assignment1
 {
     class CharLoader
     {
-        public static readonly int MAX_CHARS = 8;
+        public static readonly int MAX_CHARS = 100;
+        public static readonly int MAX_CHARS_PER_LINE = 10;
 
         List<CharMap> listOfChars;
 
@@ -15,7 +16,7 @@ namespace Rogerio.Assignment1
         }
 
         /// <summary>
-        /// Populate the list with chars and its respective draw
+        /// Populate the list with chars and their respective draw
         /// </summary>
         private void InitCharMap()
         {
@@ -46,7 +47,8 @@ namespace Rogerio.Assignment1
                 new CharMap('X', Chars.charX),
                 new CharMap('Z', Chars.charZ),
                 new CharMap('W', Chars.charW),
-                new CharMap('Y', Chars.charY)
+                new CharMap('Y', Chars.charY),
+                new CharMap(' ', Chars.charSpace)
             };
         }
 
@@ -82,15 +84,15 @@ namespace Rogerio.Assignment1
         {
             if (input == null)
             {
-                throw new Exception("Please, insert your initials");
+                throw new Exception("Please, insert your text");
             }
             else if (input.Length == 0)
             {
-                throw new Exception("Please, add at least one initial");
+                throw new Exception("Please, add at least one char");
             }
-            else if (input.Length >= MAX_CHARS)
+            else if (input.Length > MAX_CHARS)
             {
-                throw new Exception(String.Format("Please, add only {0} initials to print", MAX_CHARS));
+                throw new Exception(String.Format("Please, add only {0} chars to print", MAX_CHARS));
             }
         }
     }
