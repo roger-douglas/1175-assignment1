@@ -5,15 +5,15 @@ namespace Rogerio.Assignment1
 {
     class CharLoader
     {
-        public static readonly int MAX_CHARS = 100;
-        public static readonly int MAX_CHARS_PER_LINE = 10;
-
         List<CharMap> listOfChars;
 
         public CharLoader()
         {
             InitCharMap();
         }
+
+        public int MaxChars { get; set; }
+        public int MaxCharsPerLine { get; set; }
 
         /// <summary>
         /// Populate the list with chars and their respective draw
@@ -90,9 +90,9 @@ namespace Rogerio.Assignment1
             {
                 throw new Exception("Please, add at least one char");
             }
-            else if (input.Length > MAX_CHARS)
+            else if (input.Length > MaxChars)
             {
-                throw new Exception(String.Format("Please, add only {0} chars to print", MAX_CHARS));
+                throw new Exception(String.Format("Please, add only {0} chars to print", MaxChars));
             }
         }
     }

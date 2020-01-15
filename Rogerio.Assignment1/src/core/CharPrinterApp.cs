@@ -1,6 +1,6 @@
 ﻿using static System.Console;
-using static Rogerio.Assignment1.CharLoader;
 using System;
+using System.IO;
 
 namespace Rogerio.Assignment1.src.core
 {
@@ -20,6 +20,9 @@ namespace Rogerio.Assignment1.src.core
         /// <param name="input"></param>
         public void RunApp(string input)
         {
+            string startupPath = Environment.CurrentDirectory;
+            StreamWriter writer = new StreamWriter(startupPath + "/output.txt");
+
             try
             {
                 CharMap[] charsMap = charLoader.LoadChars(input);
@@ -28,19 +31,14 @@ namespace Rogerio.Assignment1.src.core
                 int sourceSize = charsMap.Length;
 
                 WriteLine();
-                for (int j = 0; j < MAX_CHARS_PER_LINE; j++)
+                for (int j = 0; j < sourceSize;)
                 {
                     charMapBlock = SetupBlockChar(ref sourceSize, ref sourceIndex, charsMap);
-
                     for (int i = 0; i < 7; i++)
-                        WriteLines(charMapBlock, i);
-
-                    if (sourceSize < 0)
-                        break;
-                    else
-                        sourceIndex += MAX_CHARS_PER_LINE;
+                        WriteLines(charMapBlock, i, writer);
 
                     WriteLine();
+                    writer.WriteLine();
                 }
                 WriteLine();
             }
@@ -48,19 +46,13 @@ namespace Rogerio.Assignment1.src.core
             {
                 WriteLine(e.Message);
             }
+            finally
+            {
+                writer.Close();
+            }
 
             Write("Press a key...");
             ReadKey();
-        }
-
-        private CharMap[] SetupBlockChar(ref int sourceSize, ref int sourceIndex, CharMap[] charsMap)
-        {
-            int destinationSize = sourceSize < MAX_CHARS_PER_LINE ? sourceSize : MAX_CHARS_PER_LINE;
-            CharMap[] charMapBlock = new CharMap[destinationSize];
-            Array.Copy(charsMap, sourceIndex, charMapBlock, 0, destinationSize);
-            sourceSize -= MAX_CHARS_PER_LINE;
-
-            return charMapBlock;
         }
 
         /// <summary>
@@ -68,11 +60,13 @@ namespace Rogerio.Assignment1.src.core
         /// </summary>
         public void ReadFromConsole()
         {
+            SetupCharLoader();
+
             string input;
             do
             {
                 Clear();
-                WriteLine(String.Format("Enter your text ({0} chars maximum):", CharLoader.MAX_CHARS));
+                WriteLine(String.Format("Enter your text ({0} characters maximum):", charLoader.MaxChars));
                 input = ReadLine().Trim();
                 RunApp(input);
 
@@ -86,26 +80,83 @@ namespace Rogerio.Assignment1.src.core
             while (true);
         }
 
+        private void SetupCharLoader()
+        {
+            string input;
+            WriteLine("Limit of characters: ");
+            input = ReadLine().Trim();
+
+            if (int.TryParse(input, out int value))
+                charLoader.MaxChars = value;
+            else
+                charLoader.MaxChars = 100;
+
+            WriteLine("Limit of columns: ");
+            input = ReadLine().Trim();
+
+            if (int.TryParse(input, out value))
+                charLoader.MaxCharsPerLine = value;
+            else
+                charLoader.MaxCharsPerLine = 10;
+
+            Clear();
+        }
+
+        /// <summary>
+        /// Verify and create a buffer of blocks respecting the character limits per line
+        /// </summary>
+        /// <param name="sourceSize"></param>
+        /// <param name="sourceIndex"></param>
+        /// <param name="charsMap"></param>
+        /// <returns></returns>
+        private CharMap[] SetupBlockChar(ref int sourceSize, ref int sourceIndex, CharMap[] charsMap)
+        {
+            int destinationSize = FindSpaceToWrap(charsMap, sourceIndex + charLoader.MaxCharsPerLine);
+            int buffersize = destinationSize - sourceIndex;
+            CharMap[] charMapBlock = new CharMap[buffersize > 0 ? buffersize : 1];
+            Array.Copy(charsMap, sourceIndex, charMapBlock, 0, charMapBlock.Length);
+
+            sourceSize -= charMapBlock.Length;
+            sourceIndex += charMapBlock.Length;
+
+            return charMapBlock;
+        }
+
+        /// <summary>
+        /// Find the space nearby and return the position where it was found
+        /// </summary>
+        /// <param name="charMap"></param>
+        /// <param name="sourceIndex"></param>
+        /// <returns></returns>
+        private int FindSpaceToWrap(CharMap[] charMap, int sourceIndex)
+        {
+            for (int i = sourceIndex; i >= 0 && sourceIndex < charMap.Length; i--)
+                if (charMap[i].Map.Equals(Chars.charSpace))
+                    return i + 1;
+
+            return sourceIndex < charMap.Length ? sourceIndex : charMap.Length;
+        }
+
+
         /// <summary>
         /// It writes all the lines
         /// </summary>
         /// <param name="charsMap">Array of drawn chars</param>
         /// <param name="line">Line position</param>
-        private void WriteLines(CharMap[] charsMap, int line)
+        private void WriteLines(CharMap[] charsMap, int line, StreamWriter writer)
         {
-            if (charsMap.Length > 1)
+            string buffer = String.Empty;
+            string[] charMap = new string[charsMap.Length];
+
+            for (int i = 0; i < charsMap.Length; i++)
             {
-                string buffer = String.Empty;
-                string[] charMap = new string[charsMap.Length];
-
-                for (int i = 0; i < charsMap.Length; i++)
-                {
-                    buffer += "{" + i + "}   ";
-                    charMap[i] = charsMap[i].Map[line];
-                }
-
-                WriteLine(String.Format(buffer.Substring(0, buffer.Length - 3), charMap));
+                buffer += "{" + i + "}   ";
+                charMap[i] = charsMap[i].Map[line];
             }
+
+            string linePrinted = String.Format(buffer.Substring(0, buffer.Length - 3), charMap);
+            WriteLine(linePrinted);
+            writer.WriteLine(linePrinted);
         }
     }
 }
