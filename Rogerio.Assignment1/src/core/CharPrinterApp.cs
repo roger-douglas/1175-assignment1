@@ -6,12 +6,20 @@ namespace Rogerio.Assignment1.src.core
 {
     class CharPrinterApp
     {
-        readonly CharLoader charLoader;
+        CharLoader charLoader;
 
         public CharPrinterApp()
         {
-            Title = "Draw my input";
-            charLoader = new CharLoader();
+            Title = "Draw my Input";
+        }
+
+        public void InitializeCharLoader(int columns, int charLimit)
+        {
+            charLoader = new CharLoader
+            {
+                MaxCharsPerLine = columns,
+                MaxChars = charLimit
+            };
         }
 
         /// <summary>
@@ -71,33 +79,32 @@ namespace Rogerio.Assignment1.src.core
                 RunApp(input);
 
                 Clear();
-                WriteLine("(E)xit");
+                WriteLine("(E)xit / (S)etup");
                 input = ReadLine().Trim();
 
                 if (input.ToUpper().Equals("E"))
                     break;
+                else if (input.ToUpper().Equals("S"))
+                    SetupCharLoader();
             }
             while (true);
         }
 
+        /// <summary>
+        /// Initialize the CharLoader by setting up its limits
+        /// </summary>
         private void SetupCharLoader()
         {
             string input;
             WriteLine("Limit of characters: ");
             input = ReadLine().Trim();
-
-            if (int.TryParse(input, out int value))
-                charLoader.MaxChars = value;
-            else
-                charLoader.MaxChars = 100;
+            int.TryParse(input, out int charLimit);
 
             WriteLine("Limit of columns: ");
             input = ReadLine().Trim();
+            int.TryParse(input, out int columns);
 
-            if (int.TryParse(input, out value))
-                charLoader.MaxCharsPerLine = value;
-            else
-                charLoader.MaxCharsPerLine = 10;
+            InitializeCharLoader(columns, charLimit);
 
             Clear();
         }
@@ -130,13 +137,18 @@ namespace Rogerio.Assignment1.src.core
         /// <returns></returns>
         private int FindSpaceToWrap(CharMap[] charMap, int sourceIndex)
         {
+            int columnLimit = charLoader.MaxCharsPerLine;
             for (int i = sourceIndex; i >= 0 && sourceIndex < charMap.Length; i--)
+            {
+                columnLimit--;
+                if (columnLimit == 0)
+                    return i + charLoader.MaxCharsPerLine;
                 if (charMap[i].Map.Equals(Chars.charSpace))
                     return i + 1;
+            }
 
             return sourceIndex < charMap.Length ? sourceIndex : charMap.Length;
         }
-
 
         /// <summary>
         /// It writes all the lines
