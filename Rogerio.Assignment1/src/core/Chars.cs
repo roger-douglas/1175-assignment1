@@ -184,7 +184,7 @@
 
         public static readonly string[] charS = {
             "  ***** ",
-            " *     \\",
+            "*      \\",
             "\\       ",
             "  ***** ",
             "*      \\",
