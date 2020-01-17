@@ -39,7 +39,7 @@ namespace Rogerio.Assignment1.src.core
                 int sourceSize = charsMap.Length;
 
                 WriteLine();
-                for (int j = 0; j < sourceSize;)
+                while(sourceSize > 0)
                 {
                     charMapBlock = SetupBlockChar(ref sourceSize, ref sourceIndex, charsMap);
                     for (int i = 0; i < 7; i++)
