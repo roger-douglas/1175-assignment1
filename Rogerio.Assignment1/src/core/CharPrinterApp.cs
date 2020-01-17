@@ -140,11 +140,12 @@ namespace Rogerio.Assignment1.src.core
             int columnLimit = charLoader.MaxCharsPerLine;
             for (int i = sourceIndex; i >= 0 && sourceIndex < charMap.Length; i--)
             {
-                columnLimit--;
                 if (columnLimit == 0)
                     return i + charLoader.MaxCharsPerLine;
                 if (charMap[i].Map.Equals(Chars.charSpace))
                     return i + 1;
+
+                columnLimit--;
             }
 
             return sourceIndex < charMap.Length ? sourceIndex : charMap.Length;
